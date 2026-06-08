@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>占星骰子辞典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --paper:  #ede4d0;
+  --ink:    #1e1408;
+  --ink2:   #3a2a14;
+  --ink3:   #5c3d1e;
+  --rust:   #8b3a1a;
+  --sienna: #c17f3a;
+  --sage:   #3d5c38;
+  --teal:   #2e5050;
+  --cream:  #f5f0e4;
+  --card-planet: #0f1e3a;
+  --card-sign:   #3a1a0a;
+  --card-house:  #0f2e1a;
+}
+html { height: 100%; }
+body {
+  font-family: 'IM Fell English','Palatino Linotype',Georgia,serif;
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+body::before {
+  content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+  background-size:256px 256px; opacity:.5; mix-blend-mode:multiply;
+}
+body::after {
+  content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:radial-gradient(ellipse at center, transparent 50%, rgba(30,20,8,.2) 100%);
+}
+.surreal-layer { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
+.surreal-el    { position:absolute; pointer-events:none; opacity:.05; }
+
+.wrapper {
+  position:relative; z-index:1;
+  max-width:680px; margin:0 auto;
+  padding:3.2rem 1.5rem 5rem;
+  display:flex; flex-direction:column; align-items:center;
+  gap:2.2rem;
+}
+
+/* ── Header ── */
+header { text-align:center; }
+.header-eye { display:block; margin:0 auto 1.3rem; width:62px; height:62px; }
+.title-frame { position:relative; padding:1.1rem 2.3rem; display:inline-block; }
+.title-frame::before,.title-frame::after { content:''; position:absolute; left:0; right:0; height:3px; background:repeating-linear-gradient(90deg,var(--ink2) 0,var(--ink2) 6px,transparent 6px,transparent 9px); }
+.title-frame::before { top:0; } .title-frame::after { bottom:0; }
+.tfs { position:absolute; top:0; bottom:0; width:3px; background:repeating-linear-gradient(180deg,var(--ink2) 0,var(--ink2) 6px,transparent 6px,transparent 9px); }
+.tfs.l { left:0; } .tfs.r { right:0; }
+h1 { font-family:'Cinzel',serif; font-size:clamp(1.35rem,4vw,2.1rem); font-weight:400; letter-spacing:.18em; color:var(--ink); line-height:1.1; margin-bottom:.28rem; }
+.title-zh { font-size:clamp(.8rem,2.5vw,.98rem); letter-spacing:.55em; color:var(--ink3); }
+.subtitle { margin-top:.7rem; font-style:italic; font-size:.84rem; color:var(--ink3); opacity:.7; letter-spacing:.04em; }
+
+/* ── Question ── */
+.question-section { width:100%; max-width:560px; }
+.question-label { display:block; font-size:.64rem; letter-spacing:.22em; color:var(--ink3); margin-bottom:.52rem; text-align:center; font-family:'Cinzel',serif; }
+.question-wrap { position:relative; }
+.question-input {
+  width:100%; background:rgba(255,255,255,.3); border:none;
+  border-bottom:1.5px solid var(--ink3); border-top:1.5px solid var(--ink3);
+  color:var(--ink); font-family:'IM Fell English',Georgia,serif;
+  font-size:1rem; font-style:italic; line-height:1.7;
+  padding:.58rem 2.1rem .58rem .82rem; resize:none; outline:none;
+  transition:background .3s; min-height:47px;
+}
+.question-input::placeholder { color:rgba(58,42,20,.3); }
+.question-input:focus { background:rgba(255,255,255,.5); }
+.clear-btn { position:absolute; right:.58rem; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--ink3); cursor:pointer; font-size:.78rem; opacity:0; transition:opacity .2s; pointer-events:none; }
+.clear-btn.visible { opacity:.5; pointer-events:auto; }
+
+/* ── Roll button ── */
+.roll-btn {
+  font-family:'Cinzel',serif; font-size:.8rem; letter-spacing:.28em;
+  color:var(--cream); background:var(--ink2); border:none;
+  padding:.88rem 2.8rem; cursor:pointer; position:relative; overflow:hidden;
+  clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);
+  transition:background .22s,transform .14s;
+  box-shadow:3px 4px 0 rgba(30,20,8,.25);
+}
+.roll-btn::before { content:''; position:absolute; inset:0; background:linear-gradient(180deg,rgba(255,255,255,.12) 0%,transparent 50%); pointer-events:none; }
+.roll-btn:hover   { background:var(--rust); transform:translateY(-2px); box-shadow:3px 6px 0 rgba(30,20,8,.2); }
+.roll-btn:active  { transform:translateY(1px); }
+.roll-btn:disabled { opacity:.42; cursor:default; transform:none; }
+
+/* ── Three dict cards ── */
+.dict-cards {
+  width:100%;
+  display:flex; flex-direction:column; gap:1rem;
+  opacity:0; transform:translateY(12px);
+  transition:opacity .5s ease, transform .5s ease;
+}
+.dict-cards.visible { opacity:1; transform:translateY(0); }
+
+/* Each card */
+.dict-card {
+  width:100%;
+  background:var(--cream);
+  border:1.5px solid var(--ink2);
+  position:relative; overflow:hidden;
+  box-shadow:3px 5px 0 rgba(30,20,8,.1), 6px 10px 0 rgba(30,20,8,.05);
+  display:grid;
+  grid-template-columns: 100px 1fr;
+  min-height:110px;
+}
+/* inner rule */
+.dict-card::after {
+  content:''; position:absolute; top:5px; left:5px; right:5px; bottom:5px;
+  border:.5px solid var(--ink3); pointer-events:none; opacity:.15;
+}
+
+/* Left panel — die + symbol */
+.card-left {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:.5rem; padding:.9rem .5rem;
+  border-right:1.5px solid var(--ink2);
+  position:relative;
+}
+.card-left.planet { background: rgba(15,30,58,.06); }
+.card-left.sign   { background: rgba(58,26,10,.06); }
+.card-left.house  { background: rgba(15,46,26,.06); }
+
+/* top color stripe */
+.dict-card.planet .card-left::before,
+.dict-card.sign   .card-left::before,
+.dict-card.house  .card-left::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:3px;
+}
+.dict-card.planet .card-left::before { background:rgba(15,30,58,.5); }
+.dict-card.sign   .card-left::before { background:rgba(139,58,26,.6); }
+.dict-card.house  .card-left::before { background:rgba(46,80,46,.5); }
+
+.card-type {
+  font-family:'Cinzel',serif; font-size:.52rem; letter-spacing:.22em;
+  opacity:.5; color:var(--ink2);
+}
+.card-symbol { font-size:2.4rem; line-height:1; color:var(--ink2); }
+.card-name   { font-family:'Cinzel',serif; font-size:.6rem; letter-spacing:.1em; color:var(--ink2); text-align:center; }
+
+/* Right panel — dict content */
+.card-right {
+  padding:.9rem 1.1rem .9rem 1rem;
+  display:flex; flex-direction:column; gap:.52rem;
+}
+.card-keyword {
+  font-family:'Cinzel',serif; font-size:.72rem; letter-spacing:.08em;
+  color:var(--ink); font-weight:500;
+  padding-bottom:.38rem;
+  border-bottom:1px solid rgba(58,42,20,.15);
+}
+.card-meaning {
+  font-size:.88rem; line-height:1.75; color:var(--ink2); font-style:italic;
+}
+.card-guide-label {
+  font-family:'Cinzel',serif; font-size:.52rem; letter-spacing:.2em;
+  color:var(--rust); opacity:.75; margin-top:.1rem;
+}
+.card-guide {
+  font-size:.82rem; line-height:1.65; color:var(--ink3);
+}
+
+/* rolling state */
+.dict-card.rolling .card-symbol { animation:pulse-symbol .5s ease-in-out infinite alternate; }
+@keyframes pulse-symbol {
+  from { opacity:.3; transform:scale(.88); }
+  to   { opacity:.8; transform:scale(1.08); }
+}
+
+/* ── Question echo ── */
+.question-echo {
+  width:100%; max-width:560px;
+  text-align:center; font-size:.82rem; font-style:italic;
+  color:var(--ink3); opacity:.65; line-height:1.6;
+  display:none;
+}
+.question-echo.visible { display:block; }
+
+/* ── Ornament ── */
+.ornament {
+  display:flex; align-items:center; gap:1rem;
+  width:100%; max-width:540px;
+  opacity:0; transition:opacity .7s ease .25s;
+}
+.ornament.visible { opacity:1; }
+.ornament-line { flex:1; height:1px; background:repeating-linear-gradient(90deg,var(--ink3) 0,var(--ink3) 3px,transparent 3px,transparent 7px); opacity:.28; }
+.ornament-glyph { color:var(--rust); font-size:.9rem; opacity:.6; }
+
+/* ── History ── */
+.history-section { width:100%; }
+.history-title { font-family:'Cinzel',serif; font-size:.54rem; letter-spacing:.3em; color:var(--ink3); text-align:center; margin-bottom:.65rem; opacity:.4; }
+.history-list  { display:flex; flex-direction:column; gap:.3rem; }
+.history-item  { display:flex; align-items:center; gap:.8rem; padding:.42rem .78rem; border-bottom:1px solid rgba(58,42,20,.1); font-size:.78rem; color:rgba(58,42,20,.46); cursor:pointer; transition:all .18s; font-style:italic; }
+.history-item:hover { color:var(--ink2); background:rgba(255,255,255,.38); }
+.history-syms { font-size:.88rem; flex-shrink:0; opacity:.52; font-style:normal; letter-spacing:.06em; }
+.history-q    { flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+
+footer { font-size:.67rem; letter-spacing:.18em; color:var(--ink3); opacity:.27; text-align:center; font-style:italic; }
+
+@media (max-width:500px) {
+  .dict-card { grid-template-columns:80px 1fr; }
+  .card-symbol { font-size:2rem; }
+  .card-right { padding:.75rem .85rem .75rem .8rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="surreal-layer" aria-hidden="true">
+  <svg class="surreal-el" style="top:-4%;right:-3%;width:36%;max-width:320px;" viewBox="0 0 400 320" fill="none">
+    <ellipse cx="200" cy="160" rx="195" ry="130" stroke="#1e1408" stroke-width="1.5"/>
+    <ellipse cx="200" cy="160" rx="140" ry="90" stroke="#1e1408" stroke-width="1"/>
+    <circle cx="200" cy="160" r="55" stroke="#1e1408" stroke-width="1.5" fill="none"/>
+    <circle cx="200" cy="160" r="28" fill="#1e1408" opacity=".7"/>
+    <circle cx="214" cy="148" r="8" fill="white" opacity=".6"/>
+    <line x1="5" y1="160" x2="40" y2="155" stroke="#1e1408" stroke-width="1"/>
+    <line x1="12" y1="120" x2="48" y2="128" stroke="#1e1408" stroke-width="1"/>
+    <line x1="30" y1="84" x2="60" y2="100" stroke="#1e1408" stroke-width="1"/>
+    <line x1="395" y1="160" x2="360" y2="155" stroke="#1e1408" stroke-width="1"/>
+    <line x1="388" y1="120" x2="352" y2="128" stroke="#1e1408" stroke-width="1"/>
+    <line x1="370" y1="84" x2="340" y2="100" stroke="#1e1408" stroke-width="1"/>
+  </svg>
+  <svg class="surreal-el" style="bottom:3%;left:-1%;width:22%;max-width:190px;" viewBox="0 0 260 340" fill="none">
+    <path d="M60 220 Q50 260 55 310 Q80 320 140 315 Q190 310 200 280 Q205 240 195 215" stroke="#1e1408" stroke-width="1.5" fill="none"/>
+    <path d="M75 220 Q70 170 72 130 Q75 110 82 100 Q90 92 98 105 Q104 118 100 145 L95 220" stroke="#1e1408" stroke-width="1.2" fill="none"/>
+    <path d="M100 218 Q98 155 100 108 Q103 88 112 82 Q122 76 128 90 Q133 105 128 145 L122 218" stroke="#1e1408" stroke-width="1.2" fill="none"/>
+    <path d="M126 218 Q125 158 128 115 Q131 96 140 92 Q150 88 155 103 Q158 118 153 152 L148 218" stroke="#1e1408" stroke-width="1.2" fill="none"/>
+    <path d="M63 225 Q42 210 40 192 Q40 175 52 170 Q62 167 72 180 L76 210" stroke="#1e1408" stroke-width="1.2" fill="none"/>
+    <circle cx="128" cy="268" r="22" stroke="#1e1408" stroke-width="1"/>
+    <ellipse cx="128" cy="268" rx="32" ry="8" stroke="#1e1408" stroke-width=".8" fill="none"/>
+  </svg>
+  <svg class="surreal-el" style="top:10%;left:1%;width:8%;max-width:68px;" viewBox="0 0 90 160" fill="none">
+    <rect x="10" y="5" width="70" height="8" rx="2" stroke="#1e1408" stroke-width="1.2" fill="none"/>
+    <rect x="10" y="147" width="70" height="8" rx="2" stroke="#1e1408" stroke-width="1.2" fill="none"/>
+    <path d="M16 13 Q45 80 74 147" stroke="#1e1408" stroke-width="1.2" fill="none"/>
+    <path d="M74 13 Q45 80 16 147" stroke="#1e1408" stroke-width="1.2" fill="none"/>
+    <circle cx="45" cy="80" r="6" stroke="#1e1408" stroke-width="1" fill="none"/>
+    <circle cx="45" cy="92" r="2" fill="#1e1408" opacity=".38"/>
+  </svg>
+  <svg class="surreal-el" style="top:42%;right:0%;width:10%;max-width:85px;" viewBox="0 0 110 180" fill="none">
+    <path d="M55 20 C90 20,100 55,90 80 C80 105,50 110,40 130 C30 150,45 170,55 165" stroke="#1e1408" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <path d="M55 20 C20 20,10 55,20 80 C30 105,60 110,70 130 C80 150,65 170,55 165" stroke="#1e1408" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <circle cx="55" cy="165" r="5" stroke="#1e1408" stroke-width="1.2" fill="none"/>
+    <path d="M50 18 L55 8 L60 18" stroke="#1e1408" stroke-width="1.2" fill="none"/>
+    <ellipse cx="55" cy="40" rx="5" ry="3" stroke="#1e1408" stroke-width=".8" fill="none"/>
+    <circle cx="55" cy="40" r="1.5" fill="#1e1408" opacity=".5"/>
+  </svg>
+  <svg class="surreal-el" style="bottom:7%;right:1%;width:10%;max-width:88px;" viewBox="0 0 120 100" fill="none">
+    <ellipse cx="55" cy="40" rx="40" ry="35" stroke="#1e1408" stroke-width="1.2" fill="none"/>
+    <path d="M55 40 L55 20" stroke="#1e1408" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M55 40 L70 35" stroke="#1e1408" stroke-width="1.2" stroke-linecap="round"/>
+    <path d="M90 55 Q100 65 95 78 Q90 90 80 88 Q70 86 72 75" stroke="#1e1408" stroke-width="1.2" fill="none"/>
+    <path d="M20 50 Q10 62 15 74 Q20 85 30 83" stroke="#1e1408" stroke-width="1.2" fill="none"/>
+    <line x1="55" y1="8" x2="55" y2="14" stroke="#1e1408" stroke-width="1"/>
+    <line x1="55" y1="66" x2="55" y2="72" stroke="#1e1408" stroke-width="1"/>
+    <line x1="18" y1="40" x2="24" y2="40" stroke="#1e1408" stroke-width="1"/>
+    <line x1="86" y1="40" x2="92" y2="40" stroke="#1e1408" stroke-width="1"/>
+  </svg>
+</div>
+
+<div class="wrapper">
+  <header>
+    <svg class="header-eye" viewBox="0 0 80 80" fill="none" aria-hidden="true">
+      <circle cx="40" cy="40" r="37" stroke="#1e1408" stroke-width="1"/>
+      <circle cx="40" cy="40" r="28" stroke="#1e1408" stroke-width=".6" stroke-dasharray="2 3"/>
+      <ellipse cx="40" cy="40" rx="36" ry="18" stroke="#1e1408" stroke-width="1" fill="none"/>
+      <circle cx="40" cy="40" r="10" stroke="#1e1408" stroke-width="1" fill="none"/>
+      <circle cx="40" cy="40" r="4" fill="#1e1408" opacity=".7"/>
+      <circle cx="44" cy="37" r="2" fill="white" opacity=".5"/>
+      <line x1="40" y1="3" x2="40" y2="11" stroke="#1e1408" stroke-width=".8"/>
+      <line x1="40" y1="69" x2="40" y2="77" stroke="#1e1408" stroke-width=".8"/>
+      <line x1="3" y1="40" x2="11" y2="40" stroke="#1e1408" stroke-width=".8"/>
+      <line x1="69" y1="40" x2="77" y2="40" stroke="#1e1408" stroke-width=".8"/>
+      <line x1="14" y1="14" x2="20" y2="20" stroke="#1e1408" stroke-width=".7"/>
+      <line x1="60" y1="60" x2="66" y2="66" stroke="#1e1408" stroke-width=".7"/>
+      <line x1="66" y1="14" x2="60" y2="20" stroke="#1e1408" stroke-width=".7"/>
+      <line x1="14" y1="66" x2="20" y2="60" stroke="#1e1408" stroke-width=".7"/>
+    </svg>
+    <div class="title-frame">
+      <div class="tfs l"></div><div class="tfs r"></div>
+      <h1>ASTRAL DICE</h1>
+      <p class="title-zh">占 星 骰 子</p>
+    </div>
+    <p class="subtitle">投出骰子，对照释义，自行拼读</p>
+  </header>
+
+  <div class="question-section">
+    <label class="question-label" for="questionInput">将 你 的 问 题 默 念 于 心，也 可 写 下</label>
+    <div class="question-wrap">
+      <textarea class="question-input" id="questionInput" rows="2"
+        placeholder="今日运势？这件事值不值得？……"
+        oninput="onQInput()"></textarea>
+      <button class="clear-btn" id="clearBtn" onclick="clearQ()">✕</button>
+    </div>
+  </div>
+
+  <button class="roll-btn" id="rollBtn" onclick="roll()">✦ 投 掷 骰 子 ✦</button>
+
+  <div class="ornament" id="ornament">
+    <div class="ornament-line"></div>
+    <span class="ornament-glyph">☽ ✦ ☾</span>
+    <div class="ornament-line"></div>
+  </div>
+
+  <p class="question-echo" id="questionEcho"></p>
+
+  <div class="dict-cards" id="dictCards">
+
+    <!-- 行星卡 -->
+    <div class="dict-card planet" id="cardPlanet">
+      <div class="card-left planet">
+        <span class="card-type">行 星</span>
+        <span class="card-symbol" id="pSymbol">☉</span>
+        <span class="card-name"   id="pName">—</span>
+      </div>
+      <div class="card-right">
+        <div class="card-keyword" id="pKeyword">—</div>
+        <div class="card-meaning" id="pMeaning"></div>
+        <div class="card-guide-label">对照问题，关注</div>
+        <div class="card-guide"   id="pGuide"></div>
+      </div>
+    </div>
+
+    <!-- 星座卡 -->
+    <div class="dict-card sign" id="cardSign">
+      <div class="card-left sign">
+        <span class="card-type">星 座</span>
+        <span class="card-symbol" id="sSymbol">♈</span>
+        <span class="card-name"   id="sName">—</span>
+      </div>
+      <div class="card-right">
+        <div class="card-keyword" id="sKeyword">—</div>
+        <div class="card-meaning" id="sMeaning"></div>
+        <div class="card-guide-label">对照问题，关注</div>
+        <div class="card-guide"   id="sGuide"></div>
+      </div>
+    </div>
+
+    <!-- 宫位卡 -->
+    <div class="dict-card house" id="cardHouse">
+      <div class="card-left house">
+        <span class="card-type">宫 位</span>
+        <span class="card-symbol" id="hSymbol">Ⅰ</span>
+        <span class="card-name"   id="hName">—</span>
+      </div>
+      <div class="card-right">
+        <div class="card-keyword" id="hKeyword">—</div>
+        <div class="card-meaning" id="hMeaning"></div>
+        <div class="card-guide-label">对照问题，关注</div>
+        <div class="card-guide"   id="hGuide"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="history-section" id="historySection" style="display:none">
+    <p class="history-title">— 历 史 投 掷 —</p>
+    <div class="history-list" id="historyList"></div>
+  </div>
+
+  <footer>星象指引方向，命运由你掌握</footer>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  占星辞典数据库
+//  每个条目：symbol / name / keyword / meaning / guide
+//  meaning = 这个骰子的本质含义（是什么）
+//  guide   = 拿到这个骰子后，要往哪里看
+// ══════════════════════════════════════════════
+
+const PLANETS = [
+  {
+    symbol: '☉', name: '太阳',
+    keyword: '驱动力 · 整体结构 · 起因',
+    meaning: '太阳是能量的源泉，代表整件事的驱动过程。它告诉你这件事整体是怎么发生的，核心动力来自哪里。',
+    guide: '从最宏观、最整体的角度看这件事是如何被推动的；若是猜测某个物体，注意最明显、最开放的特征。',
+  },
+  {
+    symbol: '☽', name: '月亮',
+    keyword: '过去 · 历史惯性 · 曾经',
+    meaning: '月亮代表"过去时"。这里呈现的不是当下的新状态，而是由历史积淀而来的惯性与延续。',
+    guide: '把问题放到"以前发生过什么"的视角下来看；现在的状态，很可能是过去某件事留下的结果。',
+  },
+  {
+    symbol: '☿', name: '水星',
+    keyword: '信息 · 文字 · 沟通 · 数量',
+    meaning: '水星的核心是"信息"。它指向事物中可以被言说、被记录、被传递的那一层——文字、数字、内容。',
+    guide: '关注这件事里的沟通细节：说了什么、写了什么、传递了什么；或者关注某个具体的数字与内容。',
+  },
+  {
+    symbol: '♀', name: '金星',
+    keyword: '表象 · 感官感受 · 看起来如何',
+    meaning: '金星指向感官层面——事情"看起来"的样子、第一印象、外观。但注意：表面未必等于本质，金星有时带来错觉。',
+    guide: '先看这件事在感官上呈现出什么样子；再问自己：这个"看起来"是否可信，背后是否还有别的东西。',
+  },
+  {
+    symbol: '♂', name: '火星',
+    keyword: '一瞬间 · 即时行为 · 回合结果',
+    meaning: '火星代表"一瞬间"的切入——一个即时发生的行为节点，像拳击的一个回合。速度不一定快，但是是即时的、完整的一击。',
+    guide: '关注这件事中某个具体的"发力点"或"触发时刻"；这一刻发生了什么，产生了什么直接效果。',
+  },
+  {
+    symbol: '♃', name: '木星',
+    keyword: '扩张 · 机会 · 可能性',
+    meaning: '木星代表扩张与可能性，不是吉凶，而是事情向外生长的空间。出现木星，事情倾向于继续延伸，不容易彻底终结。',
+    guide: '思考这件事还有哪些可能性尚未发生；机会在哪里，事情向哪个方向还有生长的空间。',
+  },
+  {
+    symbol: '♄', name: '土星',
+    keyword: '积累 · 惯性 · 缓慢显现',
+    meaning: '土星代表惯性与缓慢积累。它不否认星座的形态，而是说这个形态会晚一点才完整呈现——前段不明显，后段才清晰。',
+    guide: '把眼光放长远一些，现在看不到的，不代表没有；关注长期以来已经形成的结构与惯性。',
+  },
+  {
+    symbol: '⛢', name: '天王星',
+    keyword: '因果 · 逻辑变化 · 原因',
+    meaning: '天王星代表逻辑因果——"原因"是它的核心。出现天王星，要追溯这件事为什么会发生，背后的推导链是什么。',
+    guide: '往回追问：这件事是由什么引发的？逻辑链条是什么？找到原因，才能理解现在的状态。',
+  },
+  {
+    symbol: '♆', name: '海王星',
+    keyword: '模糊 · 不确定 · 含混',
+    meaning: '海王星代表模糊。这里的状态含混不清，难以给出明确轮廓。有时候，"说不清楚"本身就是这次投掷最诚实的答案。',
+    guide: '接受此刻信息不足的状态；不要强行得出结论，暂时搁置，或换一个角度重新审视问题本身。',
+  },
+  {
+    symbol: '♇', name: '冥王星',
+    keyword: '极致 · 最特殊 · 彻底',
+    meaning: '冥王星代表极致性——不是灾星，而是"最"的切入角度。出现冥王星，要把事情推向最深、最特殊、最彻底的方向来理解。',
+    guide: '把这件事想到最极端的程度：最好是什么样，最坏是什么样，最核心的那个东西是什么。',
+  },
+];
+
+const SIGNS = [
+  {
+    symbol: '♈', name: '白羊座',
+    keyword: '先快后慢 · 爆发性 · 简单直接',
+    meaning: '白羊座的形态像充气球撒手飞出——起势猛，能量集中在开头，之后迅速衰减。整体节奏简单直接，不拖泥带水。',
+    guide: '关注事情开头的那股冲劲，判断它能持续多久；或者留意一个简单直接、不需要太多解释的状态。',
+  },
+  {
+    symbol: '♉', name: '金牛座',
+    keyword: '价值显现 · 实质意义 · 有分量',
+    meaning: '金牛座代表价值感的过程——事物在此体现出自身的分量与意义。这个"价值"不只是金钱，也可以是作用、意义或实感。',
+    guide: '问这件事（或对象）有没有实质价值、有没有意义；关注它能带来什么真实的、有重量的东西。',
+  },
+  {
+    symbol: '♊', name: '双子座',
+    keyword: '微妙变化 · 并行切换 · 不彻底',
+    meaning: '双子座的形态是轻微摆动的——不是大幅转变，而是在接近的两个方向之间来回切换，类似多线程并行。',
+    guide: '注意事情是否在两个相近的可能性之间摇摆；变化是微妙的，不要期待一个大结论。',
+  },
+  {
+    symbol: '♋', name: '巨蟹座',
+    keyword: '维持稳定 · 保护 · 回归原状',
+    meaning: '巨蟹座的形态是保护性的——倾向于维持现有状态，像一盆水，外力让它晃动，但它会自然晃回来。稳定是主旋律。',
+    guide: '关注事情是否在努力维持某种平衡或现状；这里的运动是为了"守住"而发生的，不是为了改变。',
+  },
+  {
+    symbol: '♌', name: '狮子座',
+    keyword: '能量辐射 · 宽广 · 由中心向外散射',
+    meaning: '狮子座的形态是发散性的——能量从一个核心向四周辐射，宽广而有存在感，像阳光普照，覆盖面广。',
+    guide: '关注事情的影响范围有多广；或者找到那个中心焦点，看它向外散发出什么。',
+  },
+  {
+    symbol: '♍', name: '处女座',
+    keyword: '细节涌现 · 细碎 · 重点被淹没',
+    meaning: '处女座的形态是细节不断产生——越分越细，信息越来越多，但重点反而可能被淹没在细节里。',
+    guide: '关注这件事的细节层面；但也要警惕：细节太多时，反而需要主动找出真正重要的那一个点。',
+  },
+  {
+    symbol: '♎', name: '天秤座',
+    keyword: '趋于平衡 · 拉锯 · 难有定论',
+    meaning: '天秤座的形态是两端持续拉扯、趋于平衡——它不容易给出一个明确的结论，因为它总在寻找两边的对称。',
+    guide: '注意事情是否处于拉锯状态，两边都有道理；此刻可能没有唯一正确答案，而是需要在平衡中找位置。',
+  },
+  {
+    symbol: '♏', name: '天蝎座',
+    keyword: '从普通到特殊 · 结论性 · 彻底',
+    meaning: '天蝎座的形态是由正常进入特殊——一旦触发，便具有强烈的结论性和不可逆感，像原子弹引爆，彻底而决定性。',
+    guide: '关注这件事是否正在（或即将）走向某个决定性的节点；如果已经触发，它的结论是什么。',
+  },
+  {
+    symbol: '♐', name: '射手座',
+    keyword: '多种可能 · 随意 · 难以精准把握',
+    meaning: '射手座的形态是发散而自由的——从近到远产生多个可能性，方向不定，像从地面看飞机，飞到哪里不由你决定。',
+    guide: '不要试图精确锁定结果；关注的是整体趋势，保持距离感，允许多种可能性同时存在。',
+  },
+  {
+    symbol: '♑', name: '摩羯座',
+    keyword: '缓慢积累 · 惯性 · 不会马上改变',
+    meaning: '摩羯座的形态是厚重而持续的——缓慢积累，像盖房子垒砖，有惯性，不会突然爆发也不会轻易停下。',
+    guide: '把时间线拉长来看；此刻的状态是长期积累的结果，也不会在短时间内改变——关注长期方向。',
+  },
+  {
+    symbol: '♒', name: '水瓶座',
+    keyword: '因果推进 · 逻辑链 · 因为所以',
+    meaning: '水瓶座的形态是逻辑推进的——"因为所以"贯穿始终，一个原因推出一个结果，环环相扣。逻辑不一定合理，但关系真实存在。',
+    guide: '追问事情的因果链：这是因为什么？会导致什么？找到逻辑的起点，就能理解整个发展。',
+  },
+  {
+    symbol: '♓', name: '双鱼座',
+    keyword: '模糊流动 · 忽近忽远 · 不定',
+    meaning: '双鱼座的形态是模糊而流动的——忽近忽远，整体保持一种说不清楚的漂浮感。它不趋向结论，本身就是一种流动状态。',
+    guide: '允许事情目前是不清晰的；不要强行定性，感受整体的方向和氛围，而非追求一个明确的点。',
+  },
+];
+
+const HOUSES = [
+  {
+    symbol: 'Ⅰ', name: '第一宫',
+    keyword: '主体 · 驱动方 · 你自己',
+    meaning: '第一宫是"我"的位置——事件的发起者、推动力的一方。这里要看的是整件事的核心主体是谁、状态如何。',
+    guide: '把关注点放在主动发起的那一方（你自己，或问题中的主角）；从ta的状态和动力来理解整件事。',
+  },
+  {
+    symbol: 'Ⅱ', name: '第二宫',
+    keyword: '价值 · 意义 · 值不值得',
+    meaning: '第二宫是价值感的位置——这件事或对象本身有没有意义、能带来什么、值不值得付出。',
+    guide: '问这件事的实质价值是什么；它对你（或问题中的主体）意味着什么，有没有实际的分量。',
+  },
+  {
+    symbol: 'Ⅲ', name: '第三宫',
+    keyword: '旁边的存在 · 客观干扰 · 已有的因素',
+    meaning: '第三宫是近距离的客观存在——不属于主线，却真实存在于旁边，会对事情产生影响。大多数情况下是一种干扰或背景因素。',
+    guide: '关注这件事周边已经存在的人、事或信息；它们不是核心，但它们在场，会影响走向。',
+  },
+  {
+    symbol: 'Ⅳ', name: '第四宫',
+    keyword: '内在状态 · 底层感受 · 真实情绪',
+    meaning: '第四宫是状态层——比第一宫更内在，反映的是主体真实的情绪质地与内在感受，不是行为，而是底层的感觉。',
+    guide: '去感受这件事在内心深处真实是什么样的，不是表面的行为，而是底层的情绪状态。',
+  },
+  {
+    symbol: 'Ⅴ', name: '第五宫',
+    keyword: '核心焦点 · 最重要的那一个',
+    meaning: '第五宫是单向关注的位置——在所有因素里，这里锁定的是最被聚焦、最具重量的那一个关键点。',
+    guide: '从所有因素里找出最重要的那一个；不是全局，而是此刻最不可忽视、最值得投入注意力的那个节点。',
+  },
+  {
+    symbol: 'Ⅵ', name: '第六宫',
+    keyword: '持续运转 · 节奏 · 顺序',
+    meaning: '第六宫是运动状态的位置——关注的是事情如何一步一步按顺序推进，细节如何持续发生，节奏是否正常。',
+    guide: '关注事情实际运转的节奏和顺序；它在按照什么步骤进行？哪个环节出现了卡顿或加速？',
+  },
+  {
+    symbol: 'Ⅶ', name: '第七宫',
+    keyword: '另一方 · 依存关系 · 对方',
+    meaning: '第七宫是对方的位置——与第一宫相对，这里关注的是被动的那一方、主体所依赖或配合的对象。',
+    guide: '把目光转向另一方：对方的状态是什么？主体依赖什么、或者被什么所依赖？两者之间的连接是什么？',
+  },
+  {
+    symbol: 'Ⅷ', name: '第八宫',
+    keyword: '共性 · 历史先例 · 同类情形',
+    meaning: '第八宫是共同价值的位置——关注这件事与其他类似情形之间共享的特征，追问有没有历史先例可以参照。',
+    guide: '想一想：类似的事情之前发生过吗？有没有可以对照的情形？从共性里找线索。',
+  },
+  {
+    symbol: 'Ⅸ', name: '第九宫',
+    keyword: '远处 · 更大的视野 · 高于主体的存在',
+    meaning: '第九宫是远距离的位置——物理上、时间上、层级上超出眼前范围的那个存在。比当前视角更宏观的角度。',
+    guide: '把视野扩大到更远处：长远来看怎样？更高层面如何看待这件事？有没有超出你目前视野的因素在起作用？',
+  },
+  {
+    symbol: 'Ⅹ', name: '第十宫',
+    keyword: '公众眼光 · 外部认知 · 大家怎么看',
+    meaning: '第十宫是社会表现的位置——这件事在外部视角、公众层面呈现出什么样子，别人是如何理解和看待它的。',
+    guide: '换一个外部视角：这件事在别人眼中是什么样的？公开层面上，它呈现出什么形象？',
+  },
+  {
+    symbol: 'Ⅺ', name: '第十一宫',
+    keyword: '同类参照 · 共同逻辑 · 类比',
+    meaning: '第十一宫是同类关系的位置——关注有没有和这件事遵循同一逻辑的其他情形，用类比和参照来理解当下。',
+    guide: '找一个类似的情形来类比：有没有和这件事逻辑相同的其他案例？参照它，就能更好地理解现在。',
+  },
+  {
+    symbol: 'Ⅻ', name: '第十二宫',
+    keyword: '隐藏 · 不为人知 · 暗流',
+    meaning: '第十二宫是隐藏层——事情中那些还没有浮出水面的部分，在暗地里流动的东西，不在明面上但确实存在。',
+    guide: '关注这件事里还没有被看见的部分；有什么东西正在悄悄发生，还没有被公开，还没有被说出来？',
+  },
+];
+
+// ══════════════════════════════════════════════
+//  UI 逻辑
+// ══════════════════════════════════════════════
+let rolling = false;
+let history = [];
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function onQInput() {
+  document.getElementById('clearBtn').classList.toggle('visible', document.getElementById('questionInput').value.length > 0);
+}
+function clearQ() {
+  document.getElementById('questionInput').value = '';
+  document.getElementById('clearBtn').classList.remove('visible');
+  document.getElementById('questionInput').focus();
+}
+
+function setCard(type, data) {
+  document.getElementById(type[0]+'Symbol').textContent = data.symbol;
+  document.getElementById(type[0]+'Name').textContent   = data.name;
+  document.getElementById(type[0]+'Keyword').textContent= data.keyword;
+  document.getElementById(type[0]+'Meaning').textContent= data.meaning;
+  document.getElementById(type[0]+'Guide').textContent  = data.guide;
+}
+
+async function roll() {
+  if (rolling) return;
+  rolling = true;
+
+  const btn   = document.getElementById('rollBtn');
+  const cards = document.getElementById('dictCards');
+  btn.disabled = true;
+  btn.textContent = '星象运转中…';
+
+  // rolling animation
+  ['cardPlanet','cardSign','cardHouse'].forEach(id => document.getElementById(id).classList.add('rolling'));
+  cards.classList.remove('visible');
+  document.getElementById('ornament').classList.remove('visible');
+
+  await delay(680);
+
+  const planet = pick(PLANETS);
+  const sign   = pick(SIGNS);
+  const house  = pick(HOUSES);
+
+  ['cardPlanet','cardSign','cardHouse'].forEach(id => document.getElementById(id).classList.remove('rolling'));
+
+  setCard('p', planet);
+  setCard('s', sign);
+  setCard('h', house);
+
+  const question = document.getElementById('questionInput').value.trim();
+  const echo = document.getElementById('questionEcho');
+  if (question) { echo.textContent = '问：' + question; echo.classList.add('visible'); }
+  else          { echo.textContent = ''; echo.classList.remove('visible'); }
+
+  document.getElementById('ornament').classList.add('visible');
+  await delay(40);
+  cards.classList.add('visible');
+
+  addToHistory(planet, sign, house, question);
+
+  btn.disabled = false;
+  btn.innerHTML = '✦ 再 次 投 掷 ✦';
+  rolling = false;
+}
+
+function addToHistory(planet, sign, house, question) {
+  history.unshift({ planet, sign, house, question });
+  if (history.length > 6) history.pop();
+  const sec  = document.getElementById('historySection');
+  const list = document.getElementById('historyList');
+  if (history.length > 1) {
+    sec.style.display = 'block';
+    list.innerHTML = history.slice(1).map((h, i) => `
+      <div class="history-item" onclick="showHistory(${i+1})">
+        <span class="history-syms">${h.planet.symbol} ${h.sign.symbol} ${h.house.symbol}</span>
+        <span class="history-q">${h.question ? '问：' + h.question.substring(0,16)+(h.question.length>16?'…':'') + ' · ' : ''}${h.planet.name} · ${h.sign.name} · ${h.house.name}</span>
+      </div>`).join('');
+  }
+}
+
+async function showHistory(index) {
+  const h     = history[index];
+  if (!h) return;
+  const cards = document.getElementById('dictCards');
+  cards.classList.remove('visible');
+  await delay(260);
+
+  setCard('p', h.planet);
+  setCard('s', h.sign);
+  setCard('h', h.house);
+
+  const echo = document.getElementById('questionEcho');
+  if (h.question) { echo.textContent = '问：' + h.question; echo.classList.add('visible'); }
+  else            { echo.textContent = ''; echo.classList.remove('visible'); }
+
+  await delay(40);
+  cards.classList.add('visible');
+  cards.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+</script>
+</body>
+</html>
